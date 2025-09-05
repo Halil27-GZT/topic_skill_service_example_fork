@@ -2,11 +2,24 @@ import os
 import json # Bleibt importiert, da jsonify intern JSON verwendet und wir es für manuelle JSON-Konvertierungen nutzen könnten
 import uuid # Für die Generierung eindeutiger IDs
 from flask import Flask, jsonify, request # Flask-Anwendung, JSON-Antworten und Request-Objekt
+from flask_migrate import Migrate # Für zukünftige Datenbankmigrationen (derzeit nicht genutzt)
+from dotenv import load_dotenv # Zum Laden von Umgebungsvariablen aus einer .env Datei
+from models import db # Importiere das db Objekt aus models.py
 
 # Importiere unsere JsonDataManager-Klasse aus der data_manager.py Datei
 from data_manager import JsonDataManager
 
 app = Flask(__name__)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "DATABASE_url",
+    "postgresql+psycopg2://app:app123@localhost:5432/topics_db"
+)
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db.init_app(app)
+Migrate(app, db)
 
 # Definieren der Dateipfade für unsere Daten.
 # os.path.dirname(__file__) gibt den Pfad des aktuellen Skripts zurück.
